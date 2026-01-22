@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy Powershell project to Azure Function App - cippqk5zf-auditlog
+name: Build and deploy CIPP API to Azure Function App - cippqk5zf-auditlog
 
 on:
   push:
@@ -9,22 +6,26 @@ on:
       - master
   workflow_dispatch:
 
-env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-
 jobs:
   deploy:
-    runs-on: windows-latest
-    
+    runs-on: ubuntu-latest
+
     steps:
-      - name: 'Checkout GitHub Action'
+      - name: Checkout repo
         uses: actions/checkout@v4
-      
-      - name: 'Run Azure Functions Action'
+
+      - name: Setup PowerShell 7.4
+        uses: PowerShell/setup-powershell@v2
+        with:
+          pwsh-version: '7.4'
+
+      - name: Zip function app
+        run: |
+          zip -r functionapp.zip .
+
+      - name: Deploy to Azure Function App
         uses: Azure/functions-action@v1
-        id: fa
         with:
           app-name: 'cippqk5zf-auditlog'
-          slot-name: 'Production'
-          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3252D99561524A0AADD7C3E766B80403 }}
+          package: 'functionapp.zip'
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE_AUDITLOG }}
